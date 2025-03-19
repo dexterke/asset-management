@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <property name="HOME_LOG" value="${user.home}/asset-management/logs"/> <!-- Use this location for local dev to prevent error on startup-->
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{YYYY-MM-dd HH:mm:ss.SSS} %-5level [%-12.12thread] %-40.40logger{40} : %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${HOME_LOG}/asset-management.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${HOME_LOG}/archived/isie.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- each archived file, size max 500MB -->
+            <maxFileSize>50MB</maxFileSize>
+            <!-- total size of all archive files, if total size > 20GB, it will delete old archived file -->
+            <totalSizeCap>100MB</totalSizeCap>
+            <!-- 90 days to keep -->
+            <maxHistory>10</maxHistory>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%d{YYYY-MM-dd HH:mm:ss.SSS} %-5level [%-12.12thread] %-40.40logger{40} : %msg%n</pattern>
+        </encoder>
+    </appender>
+    <!-- Add a tag similar to the following to turn on debug logging for one or more packages or classes and everything they contain. -->
+    <!--
+    <logger name="api.sca" level="DEBUG"/>
+    <logger name="api.ProgressBean" level="DEBUG"/>
+    -->
+
+    <springProfile name="local">
+        <root level="INFO">
+            <appender-ref ref="STDOUT" />
+            <appender-ref ref="FILE-ROLLING" />
+        </root>
+    </springProfile>
+
+    <springProfile name="dev">
+        <root level="INFO">
+            <appender-ref ref="STDOUT" />
+            <appender-ref ref="FILE-ROLLING" />
+        </root>
+    </springProfile>
+
+    <springProfile name="test">
+        <root level="INFO">
+            <appender-ref ref="STDOUT" />
+            <appender-ref ref="FILE-ROLLING" />
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="STDOUT" />
+            <appender-ref ref="FILE-ROLLING" />
+        </root>
+    </springProfile>
+
+<!--    <root level="INFO">-->
+<!--        <appender-ref ref="STDOUT" />-->
+<!--        <appender-ref ref="FILE-ROLLING" />-->
+<!--    </root>-->
+
+<!--    <root level="DEBUG">-->
+<!--        <appender-ref ref="STDOUT" />-->
+<!--        <appender-ref ref="FILE-ROLLING" />-->
+<!--    </root>-->
+
+<!--    <root level="VERBOSE">-->
+<!--        <appender-ref ref="STDOUT" />-->
+<!--        <appender-ref ref="FILE-ROLLING" />-->
+<!--    </root>-->
+
+    <logger name="org.apache.tomcat.jdbc.pool.ConnectionPool" level="OFF"/>
+</configuration>
