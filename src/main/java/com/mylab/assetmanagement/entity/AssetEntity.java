@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "PROPERTY_TABLE")
+@Table(name = "ASSET")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,17 +16,18 @@ public class AssetEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    @Column(name = "PROPERTY_TITLE", nullable = false)
+    @Column(name = "TITLE", nullable = false)
     private String title;
 
-    @Column(name = "PROPERTY_DESCRIPTION", nullable = false)
+    @Column(name = "DESCRIPTION", nullable = false)
     private String description;
 
-    @Column(name = "PROPERTY_PRICE", nullable = false)
+    @Column(name = "PRICE", nullable = false)
     private Double price;
 
-    @Column(name = "PROPERTY_ADDRESS", nullable = false)
-    private String address;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "ADDRESS_ID", nullable = false)
+    private AddressEntity addressEntity;
 
     // FetchType.LAZY: don't fetch userdata while fetching asset
     @ManyToOne(fetch = FetchType.LAZY)

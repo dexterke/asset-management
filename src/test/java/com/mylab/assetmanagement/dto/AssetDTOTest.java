@@ -1,5 +1,6 @@
 package com.mylab.assetmanagement.dto;
 
+import com.mylab.assetmanagement.entity.AddressEntity;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,15 +41,6 @@ class AssetDTOTest {
 
         assertEquals(99D, testAssetDTO.getPrice());
         assertEquals(testAssetDTO.getPrice().getClass(), Double.class);
-    }
-
-    @Test
-    void addressTest() {
-        AssetDTO testAssetDTO = new AssetDTO();
-        testAssetDTO.setAddress("test");
-
-        assertEquals("test", testAssetDTO.getAddress());
-        assertEquals(testAssetDTO.getAddress().getClass(), String.class);
     }
 
     @Test

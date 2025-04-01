@@ -2,6 +2,7 @@ package com.mylab.assetmanagement.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mylab.assetmanagement.dto.AssetDTO;
+import com.mylab.assetmanagement.entity.AddressEntity;
 import com.mylab.assetmanagement.exception.CustomExceptionHandler;
 import com.mylab.assetmanagement.service.AssetService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -62,9 +63,13 @@ class AssetControllerTest {
         testAssetDto = new AssetDTO();
         testAssetDto.setTitle("title");
         testAssetDto.setPrice(0D);
-        testAssetDto.setAddress("address");
         testAssetDto.setUserId(1000L);
         testAssetDto.setDescription("description");
+        testAssetDto.setStreet("test");
+        testAssetDto.setHouseNo("test");
+        testAssetDto.setCity("test");
+        testAssetDto.setPostalCode("test");
+        testAssetDto.setCountry("test");
 
         assetDtoList = new ArrayList<>();
         assetDtoList.add(testAssetDto);
@@ -77,7 +82,7 @@ class AssetControllerTest {
     @Test
     void getAssetTest() throws Exception {
         // when exists
-        given(assetService.getAsset(1L)).willReturn(testAssetDto);
+        given(assetService.getAsset(ArgumentMatchers.any())).willReturn(testAssetDto);
         MockHttpServletResponse mockResponseOk =
                 mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/asset/getAsset/1")
                                         .contentType(MediaType.APPLICATION_JSON)
@@ -88,7 +93,7 @@ class AssetControllerTest {
         assertThat(jsonResponse).isEqualToIgnoringCase(asJsonString(testAssetDto));
 
         // when not exists
-        given(assetService.getAsset(1L)).willReturn(null);
+        given(assetService.getAsset(ArgumentMatchers.any())).willReturn(null);
         MockHttpServletResponse mockResponse
                 = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/asset/getAsset/1")
                                                .contentType(MediaType.APPLICATION_JSON)

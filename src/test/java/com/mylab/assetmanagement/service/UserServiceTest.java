@@ -1,11 +1,17 @@
 package com.mylab.assetmanagement.service;
 
+import com.mylab.assetmanagement.converter.RoleConverter;
 import com.mylab.assetmanagement.converter.UserConverter;
 import com.mylab.assetmanagement.dto.UserDTO;
+import com.mylab.assetmanagement.dto.UserRegistrationDTO;
+import com.mylab.assetmanagement.entity.AddressEntity;
 import com.mylab.assetmanagement.entity.UserEntity;
 import com.mylab.assetmanagement.exception.BusinessException;
 import com.mylab.assetmanagement.repository.AddressRepository;
+import com.mylab.assetmanagement.repository.RoleRepository;
 import com.mylab.assetmanagement.repository.UserRepository;
+import com.mylab.assetmanagement.repository.UserRoleRepository;
+import com.mylab.assetmanagement.service.impl.RoleServiceImpl;
 import com.mylab.assetmanagement.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,14 +40,27 @@ class UserServiceTest {
     @Mock
     private AddressRepository addressRepository;
 
+    @Mock
+    private RoleRepository roleRepository;
+
+    @Mock
+    private UserRoleRepository userRoleRepository;
+
     @InjectMocks
     private UserConverter userConverter;
 
     @InjectMocks
     private UserService userService = new UserServiceImpl();
 
+    @InjectMocks
+    private RoleConverter roleConverter;
+
+    @InjectMocks
+    private RoleService roleService = new RoleServiceImpl();
+
     private UserDTO testUserDto;
     private UserEntity testUserEntity;
+    private UserRegistrationDTO testRegisterUserDTO;
 
     private final List<UserEntity> testEntityList = new ArrayList<>();
 
@@ -61,12 +80,26 @@ class UserServiceTest {
         testUserDto.setName("name");
         testUserDto.setPassword("1234567890");
         testUserDto.setEmail("email@mail");
+        testUserDto.setUsername("username");
         testUserDto.setCity("city");
         testUserDto.setHouseNo("no");
         testUserDto.setPhone("+00");
         testUserDto.setCountry("country");
         testUserDto.setStreet("street");
         testUserDto.setPostalCode("code");
+        testUserDto.setRoles(new ArrayList<>());
+
+        testRegisterUserDTO = new UserRegistrationDTO();
+        testRegisterUserDTO.setName("name");
+        testRegisterUserDTO.setPassword("1234567890");
+        testRegisterUserDTO.setEmail("email@mail");
+        testRegisterUserDTO.setUsername("username");
+        testRegisterUserDTO.setCity("city");
+        testRegisterUserDTO.setHouseNo("no");
+        testRegisterUserDTO.setPhone("+00");
+        testRegisterUserDTO.setCountry("country");
+        testRegisterUserDTO.setStreet("street");
+        testRegisterUserDTO.setPostalCode("code");
 
         testUserEntity = new UserEntity();
         testUserEntity.setId(1L);
@@ -74,30 +107,38 @@ class UserServiceTest {
         testUserEntity.setPassword("1234567890");
         testUserEntity.setPhone("+00");
         testUserEntity.setEmail("email@mail");
+        testUserEntity.setUsername("username");
         testEntityList.add(testUserEntity);
 
         setPrivateField(userService, "userConverter", userConverter);
+        setPrivateField(userService, "roleService", roleService);
+
+        setPrivateField(roleService, "userRoleRepository", userRoleRepository);
+        setPrivateField(roleService, "roleRepository", roleRepository);
+        setPrivateField(roleService, "userRepository", userRepository);
+        setPrivateField(roleService, "roleConverter", roleConverter);
+
     }
 
     @Test
     void registerFailedTest() {
-        given(userRepository.findByEmail(ArgumentMatchers.any())).willReturn(Optional.of(testUserEntity));
+        given(userRepository.findByUsername(ArgumentMatchers.any())).willReturn(Optional.of(testUserEntity));
         BusinessException thrown =
                 assertThrowsExactly(BusinessException.class, () -> {
-            UserDTO registerUser = userService.register(testUserDto);
+            UserDTO registerUser = userService.register(testRegisterUserDTO);
         });
         String errMsG = thrown.getErrors().get(0).getMessage();
-        assertTrue(errMsG.contains("Email 'email@mail' already exists"));
+        assertTrue(errMsG.contains("Username 'username' already exists"));
     }
 
     @Test
     void registerTest() {
         Optional<UserEntity> optionalUserEntity = Optional.empty();
-        given(userRepository.findByEmail(ArgumentMatchers.any())).willReturn(optionalUserEntity);
-        UserDTO registerUser = userService.register(testUserDto);
+        given(userRepository.findByUsername(ArgumentMatchers.any())).willReturn(optionalUserEntity);
+        UserDTO registerUser = userService.register(testRegisterUserDTO);
         assertThat(registerUser).isNotNull()
                 .usingRecursiveComparison()
-                .ignoringFields("id", "password", "country", "city", "street", "postalCode", "houseNo")
+                .ignoringFields("id", "password", "country", "city", "street", "postalCode", "houseNo", "roles")
                 .isEqualTo(testUserEntity);
         assertThat(registerUser.getPassword()).isNull();
     }
@@ -109,16 +150,16 @@ class UserServiceTest {
             UserDTO loginUser = userService.login("", "");
         });
         String errMsG = thrown.getErrors().get(0).getMessage();
-        assertTrue(errMsG.contains("Incorrect email or password"));
+        assertTrue(errMsG.contains("Incorrect username or password"));
     }
 
     @Test
     void loginTest() {
-        given(userRepository.findByEmailAndPassword(ArgumentMatchers.any(),
+        given(userRepository.findByUsernameAndPassword(ArgumentMatchers.any(),
                                                     ArgumentMatchers.any())).willReturn(Optional.of(testUserEntity));
         UserDTO loginUser = userService.login("", "");
         assertThat(loginUser).isNotNull().usingRecursiveComparison()
-                .ignoringFields("password", "country", "city", "street", "postalCode", "houseNo")
+                .ignoringFields("password", "country", "city", "street", "postalCode", "houseNo", "roles")
                 .isEqualTo(testUserEntity);
         assertThat(loginUser.getPassword()).isNull();
     }
@@ -135,14 +176,21 @@ class UserServiceTest {
         assertThat(userDTOlist.get(0).getPassword()).isNull();
         assertThat(userDTOlist.get(0)).isNotNull()
                 .usingRecursiveComparison()
-                .ignoringFields("password", "country", "city", "street", "postalCode", "houseNo")
+                .ignoringFields("password", "country", "city", "street", "postalCode", "houseNo", "roles")
                 .isEqualTo(testUserEntity);
     }
 
     @Test
     void deleteUser() {
-        Long deleted = userService.deleteUser(0L);
-        assertThat(deleted).isNotNull();
+        Long toBeDeleted = userService.deleteUser(0L);
+        assertThat(toBeDeleted).isNotNull();
+
+        given(userRepository.findById(ArgumentMatchers.anyLong())).willReturn(Optional.of(testUserEntity));
+        given(addressRepository.findPrimaryTypeByUserEntityId(ArgumentMatchers.any())).willReturn(Optional.of(new AddressEntity()));
+
+        toBeDeleted = userService.deleteUser(testUserEntity.getId());
+        assertThat(toBeDeleted).isEqualTo(testUserEntity.getId());
+
     }
 
     @Test

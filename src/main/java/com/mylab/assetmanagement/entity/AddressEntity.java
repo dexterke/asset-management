@@ -6,11 +6,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "ADDRESS_TABLE")
+@Table(name = "ADDRESS")
 @Getter
 @Setter
 @NoArgsConstructor
 public class AddressEntity {
+
+    public enum ADDRESS_TYPE {
+        ASSET, PRIMARY;
+    };
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -35,4 +39,10 @@ public class AddressEntity {
     @JoinColumn(name = "USER_ID", nullable = false)
     private UserEntity userEntity;
 
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "ASSET_ID", nullable = true)
+    private AssetEntity assetEntity;
+
+    @Column(name = "TYPE", columnDefinition = "INT NOT NULL DEFAULT '0'")
+    private int type;
 }

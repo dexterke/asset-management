@@ -6,6 +6,8 @@ import com.mylab.assetmanagement.entity.UserEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UserConverterTest {
@@ -24,17 +26,20 @@ class UserConverterTest {
         testUserDTO.setName("name");
         testUserDTO.setPassword("1234567890");
         testUserDTO.setEmail("email@mail");
+        testUserDTO.setUsername("username");
         testUserDTO.setCity("city");
         testUserDTO.setHouseNo("no");
         testUserDTO.setCountry("country");
         testUserDTO.setStreet("street");
         testUserDTO.setPhone("+00");
         testUserDTO.setPostalCode("code");
+        testUserDTO.setRoles(Arrays.asList("role"));
 
         testUserEntity = new UserEntity();
         testUserEntity.setId(testUserDTO.getId());
         testUserEntity.setName(testUserDTO.getName());
         testUserEntity.setPassword(testUserDTO.getPassword());
+        testUserEntity.setUsername(testUserDTO.getUsername());
         testUserEntity.setEmail(testUserDTO.getPassword());
         testUserEntity.setPhone(testUserDTO.getPhone());
 
@@ -60,7 +65,7 @@ class UserConverterTest {
         UserDTO userDTO = userConverter.convertEntityToDTO(testUserEntity);
         assertThat(userDTO).isNotNull()
                 .usingRecursiveComparison()
-                .ignoringFields("country", "city", "street", "postalCode", "houseNo")
+                .ignoringFields("country", "city", "street", "postalCode", "houseNo", "roles")
                 .isEqualTo(testUserEntity);
     }
 
@@ -68,7 +73,7 @@ class UserConverterTest {
     void setUserDTOaddressTest() {
         UserDTO userDTO = userConverter.setUserDTOaddress(testUserDTO, testAddressEntity);
         assertThat(userDTO).isNotNull().usingRecursiveComparison()
-                .ignoringFields("id", "password", "phone", "name", "email")
+                .ignoringFields("id", "password", "phone", "name", "email", "username", "roles")
                 .isEqualTo(testAddressEntity);
     }
 }

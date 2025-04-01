@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "USER_TABLE")
+@Table(name = "PERSON")
 @Getter
 @Setter
 
@@ -16,6 +16,9 @@ public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
+
+    @Column(name = "USERNAME", nullable = false)
+    private String username;
 
     @Column(name = "NAME", nullable = false)
     private String name;

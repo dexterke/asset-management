@@ -2,9 +2,11 @@ package com.mylab.assetmanagement.service;
 
 import com.mylab.assetmanagement.converter.AssetConverter;
 import com.mylab.assetmanagement.dto.AssetDTO;
+import com.mylab.assetmanagement.entity.AddressEntity;
 import com.mylab.assetmanagement.entity.AssetEntity;
 import com.mylab.assetmanagement.entity.UserEntity;
 import com.mylab.assetmanagement.exception.BusinessException;
+import com.mylab.assetmanagement.repository.AddressRepository;
 import com.mylab.assetmanagement.repository.AssetRepository;
 import com.mylab.assetmanagement.repository.UserRepository;
 import com.mylab.assetmanagement.service.impl.AssetServiceImpl;
@@ -35,6 +37,9 @@ class AssetServiceTest {
     @Mock
     private AssetRepository assetRepository;
 
+    @Mock
+    private AddressRepository addressRepository;
+
     @InjectMocks
     private AssetConverter assetConverter;
 
@@ -48,6 +53,8 @@ class AssetServiceTest {
     private AssetDTO testAssetDto;
 
     private AssetEntity testAssetEntity;
+
+    private AddressEntity addressEntity;
 
     static void setPrivateFieldAccessible(Object target, String fieldName, Object value) {
         try {
@@ -65,7 +72,12 @@ class AssetServiceTest {
         testAssetDto.setTitle("testTitle");
         testAssetDto.setDescription("testDescription");
         testAssetDto.setPrice(0D);
-        testAssetDto.setAddress("testAddress");
+
+        addressEntity = new AddressEntity();
+        addressEntity.setType(AddressEntity.ADDRESS_TYPE.ASSET.ordinal());
+        addressEntity.setStreet("test");
+
+        testAssetDto.setStreet(addressEntity.getStreet());
         testAssetDto.setUserId(100L);
 
         testUserEntity = new UserEntity();
@@ -79,7 +91,7 @@ class AssetServiceTest {
         testAssetEntity.setTitle("testTitle");
         testAssetEntity.setDescription("testDescription");
         testAssetEntity.setPrice(0D);
-        testAssetEntity.setAddress("testAddress");
+        testAssetEntity.setAddressEntity(addressEntity);
         testAssetEntity.setUserEntity(testUserEntity);
 
         assetEntityList.add(testAssetEntity);
@@ -164,12 +176,25 @@ class AssetServiceTest {
 
         // when exists
         given(assetRepository.findById(ArgumentMatchers.anyLong())).willReturn(Optional.of(testAssetEntity));
+        given(addressRepository.findAssetTypeByUserEntityId(ArgumentMatchers.any())).willReturn(Optional.of(addressEntity));
+
         assetDto = assetService.updateAsset(testAssetDto,
                                             ArgumentMatchers.anyLong());
         assertThat(assetDto).isNotNull()
                 .usingRecursiveComparison()
                 .ignoringFields("id")
                 .isEqualTo(testAssetDto);
+
+        //when address not found
+        given(addressRepository.findAssetTypeByUserEntityId(ArgumentMatchers.any())).willReturn(Optional.empty() );
+        BusinessException thrown =
+                assertThrowsExactly(BusinessException.class, () -> {
+                    AssetDTO assetDTO =
+                            assetService.updateAsset(testAssetDto, ArgumentMatchers.anyLong());
+                });
+        String errMsG = thrown.getErrors().get(0).getMessage();
+        assertThat(errMsG).contains("Address does not exist");
+
     }
 
     @Test
@@ -237,12 +262,24 @@ class AssetServiceTest {
 
         // when exists
         given(assetRepository.findById(ArgumentMatchers.anyLong())).willReturn(Optional.of(testAssetEntity));
+        given(addressRepository.findAssetTypeByUserEntityId(ArgumentMatchers.anyLong())).willReturn(Optional.of(addressEntity));
         assetDto = assetService.updateAssetAddress(testAssetDto,
                                                    ArgumentMatchers.anyLong());
         assertThat(assetDto).isNotNull()
                 .usingRecursiveComparison()
                 .ignoringFields("id")
                 .isEqualTo(testAssetDto);
+
+        //when address not found
+        given(addressRepository.findAssetTypeByUserEntityId(ArgumentMatchers.any())).willReturn(Optional.empty() );
+        BusinessException thrown =
+                assertThrowsExactly(BusinessException.class, () -> {
+                    AssetDTO assetDTO =
+                            assetService.updateAssetAddress(testAssetDto, ArgumentMatchers.anyLong());
+                });
+        String errMsG = thrown.getErrors().get(0).getMessage();
+        assertThat(errMsG).contains("Address does not exist");
+
     }
 
     @Test

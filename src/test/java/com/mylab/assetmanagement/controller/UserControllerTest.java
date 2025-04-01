@@ -3,6 +3,7 @@ package com.mylab.assetmanagement.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mylab.assetmanagement.dto.UserDTO;
 import com.mylab.assetmanagement.dto.UserLoginDTO;
+import com.mylab.assetmanagement.dto.UserRegistrationDTO;
 import com.mylab.assetmanagement.exception.BusinessException;
 import com.mylab.assetmanagement.exception.CustomExceptionHandler;
 import com.mylab.assetmanagement.exception.ErrorModel;
@@ -51,6 +52,8 @@ class UserControllerTest {
 
     private UserDTO testUserDto;
 
+    private UserRegistrationDTO testRegisterUserDTO;
+
     public static String asJsonString(final Object obj) {
         try {
             return new ObjectMapper().writeValueAsString(obj);
@@ -66,12 +69,26 @@ class UserControllerTest {
         testUserDto.setName("name");
         testUserDto.setPassword("1234567890");
         testUserDto.setEmail("email@mail");
+        testUserDto.setUsername("username");
         testUserDto.setCity("city");
         testUserDto.setHouseNo("no");
         testUserDto.setCountry("country");
         testUserDto.setStreet("street");
         testUserDto.setPhone("+00");
         testUserDto.setPostalCode("code");
+
+        testRegisterUserDTO = new UserRegistrationDTO();
+        testRegisterUserDTO.setName("name");
+        testRegisterUserDTO.setPassword("1234567890");
+        testRegisterUserDTO.setEmail("email@mail");
+        testRegisterUserDTO.setUsername("username");
+        testRegisterUserDTO.setUsername("testusername");
+        testRegisterUserDTO.setCity("city");
+        testRegisterUserDTO.setHouseNo("no");
+        testRegisterUserDTO.setPhone("+00");
+        testRegisterUserDTO.setCountry("country");
+        testRegisterUserDTO.setStreet("street");
+        testRegisterUserDTO.setPostalCode("code");
 
         userDtoList = new ArrayList<>();
         userDtoList.add(testUserDto);
@@ -120,7 +137,8 @@ class UserControllerTest {
         assertThat(jsonResponse).isEqualToIgnoringCase(asJsonString(userDtoList));
 
         // when not exists
-        given(userService.getAllUsers()).willReturn(null);
+        List<UserDTO> userDTOlist = new ArrayList<>();
+        given(userService.getAllUsers()).willReturn(userDTOlist);
         mockResponse =
                 mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/user/getAllUsers")
                                                              .contentType(MediaType.APPLICATION_JSON)
@@ -133,10 +151,10 @@ class UserControllerTest {
     @Test
     void loginTest() throws Exception {
         UserLoginDTO userLoginDTO = new UserLoginDTO();
-        userLoginDTO.setEmail(testUserDto.getEmail());
+        userLoginDTO.setUsername(testUserDto.getUsername());
         userLoginDTO.setPassword(testUserDto.getPassword());
         // successful login
-        given(userService.login(testUserDto.getEmail(), testUserDto.getPassword())).willReturn(userLoginDTO);
+        given(userService.login(testUserDto.getUsername(), testUserDto.getPassword())).willReturn(userLoginDTO);
         MvcResult mockResult =
                 mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/user/login/")
                                                       .contentType(MediaType.APPLICATION_JSON)
@@ -152,7 +170,7 @@ class UserControllerTest {
     @Test
     void loginFailTest() throws Exception {
         UserLoginDTO userLoginDTO = new UserLoginDTO();
-        userLoginDTO.setEmail(testUserDto.getEmail());
+        userLoginDTO.setUsername(testUserDto.getUsername());
         userLoginDTO.setPassword(testUserDto.getPassword());
 
         List<ErrorModel> errorModelList = new ArrayList<>();
@@ -174,11 +192,11 @@ class UserControllerTest {
     @Test
     void registerTest() throws Exception {
         // successful register
-        given(userService.register((UserDTO) ArgumentMatchers.<HttpServletRequest>any())).willReturn(testUserDto);
+        given(userService.register((UserRegistrationDTO) ArgumentMatchers.<HttpServletRequest>any())).willReturn(testUserDto);
         MvcResult mockResult =
                 mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/user/register")
                                                       .contentType(MediaType.APPLICATION_JSON)
-                                                      .content(asJsonString(testUserDto).getBytes(StandardCharsets.UTF_8))
+                                                      .content(asJsonString(testRegisterUserDTO).getBytes(StandardCharsets.UTF_8))
                                                       .accept(MediaType.APPLICATION_JSON))
                        .andExpect(MockMvcResultMatchers.status().isCreated()).andReturn();
         String jsonResponse = mockResult.getResponse().getContentAsString();
@@ -187,11 +205,11 @@ class UserControllerTest {
         assertThat(jsonResponse).isEqualToIgnoringCase(asJsonString(testUserDto));
 
         // fail
-        given(userService.register((UserDTO) ArgumentMatchers.<HttpServletRequest>any())).willReturn(null);
+        given(userService.register((UserRegistrationDTO) ArgumentMatchers.<HttpServletRequest>any())).willReturn(null);
         mockResult =
                 mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/user/register")
                                                       .contentType(MediaType.APPLICATION_JSON)
-                                                      .content(asJsonString(testUserDto).getBytes(StandardCharsets.UTF_8))
+                                                      .content(asJsonString(testRegisterUserDTO).getBytes(StandardCharsets.UTF_8))
                                                       .accept(MediaType.APPLICATION_JSON))
                        .andExpect(MockMvcResultMatchers.status().isInternalServerError()).andReturn();
         jsonResponse = mockResult.getResponse().getContentAsString();

@@ -1,6 +1,7 @@
 package com.mylab.assetmanagement.service;
 
 import com.mylab.assetmanagement.dto.UserDTO;
+import com.mylab.assetmanagement.dto.UserRegistrationDTO;
 
 import java.util.List;
 
@@ -11,9 +12,9 @@ import java.util.List;
  */
 public interface UserService {
 
-    UserDTO register(UserDTO userDTO);
+    UserDTO register(UserRegistrationDTO userDTO);
 
-    UserDTO login(String email, String password);
+    UserDTO login(String username, String password);
 
     List<UserDTO> getAllUsers();
 

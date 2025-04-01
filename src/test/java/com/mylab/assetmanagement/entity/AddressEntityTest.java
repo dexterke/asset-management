@@ -30,7 +30,7 @@ class AddressEntityTest {
     void idTest() {
         testAddressEntity.setId(0L);
         Object id = testAddressEntity.getId();
-        assertThat(id).isNotNull().isInstanceOf(Long.class);
+        assertThat(id).isNotNull().isInstanceOf(Long.class).isEqualTo(0l);
     }
 
     @Test

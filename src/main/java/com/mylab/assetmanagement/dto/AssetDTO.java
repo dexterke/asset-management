@@ -20,8 +20,20 @@ public class AssetDTO {
     @NotNull(message = "Price is mandatory")
     private Double price;
 
+    @NotNull(message = "House no. is mandatory")
+    private String houseNo;
+
+     @NotNull(message = "Address is mandatory")
+    private String street;
+
     @NotNull(message = "Address is mandatory")
-    private String address;
+    private String city;
+
+    @NotNull(message = "Address is mandatory")
+    private String postalCode;
+
+    @NotNull(message = "Address is mandatory")
+    private String country;
 
     private Long userId;
 

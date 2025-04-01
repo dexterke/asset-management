@@ -28,6 +28,7 @@ class UserRepositoryTest {
         testUserEntity = new UserEntity();
         testUserEntity.setName("name");
         testUserEntity.setEmail("email");
+        testUserEntity.setUsername("username");
         testUserEntity.setPassword("password");
         testUserEntity.setPhone("00");
     }

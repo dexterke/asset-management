@@ -2,12 +2,14 @@ package com.mylab.assetmanagement.service.impl;
 
 import com.mylab.assetmanagement.converter.UserConverter;
 import com.mylab.assetmanagement.dto.UserDTO;
+import com.mylab.assetmanagement.dto.UserRegistrationDTO;
 import com.mylab.assetmanagement.entity.AddressEntity;
 import com.mylab.assetmanagement.entity.UserEntity;
 import com.mylab.assetmanagement.exception.BusinessException;
 import com.mylab.assetmanagement.exception.ErrorModel;
 import com.mylab.assetmanagement.repository.AddressRepository;
 import com.mylab.assetmanagement.repository.UserRepository;
+import com.mylab.assetmanagement.service.RoleService;
 import com.mylab.assetmanagement.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,31 +39,36 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private AddressRepository addressRepository;
 
-    @Override
-    public UserDTO register(UserDTO userDTO) {
-        UserEntity userEntity;
+    @Autowired
+    private RoleService roleService;
 
-        Optional<UserEntity> optionalUserEntity = userRepository.findByEmail(userDTO.getEmail());
+    @Override
+    public UserDTO register(UserRegistrationDTO userRegistrationDTO) {
+        UserEntity userEntity;
+        UserDTO userDTO;
+        Optional<UserEntity> optionalUserEntity = userRepository.findByUsername(userRegistrationDTO.getUsername());
         if (optionalUserEntity.isPresent()) {
             List<ErrorModel> errorModelList = new ArrayList<>();
             ErrorModel errorModel = new ErrorModel();
-            errorModel.setCode("EMAIL_ALREADY_EXISTS");
-            String errMessage = "Email '" + userDTO.getEmail() + "' already exists";
+            errorModel.setCode("USER_ALREADY_EXISTS");
+            String errMessage = "Username '" + userRegistrationDTO.getUsername() + "' already exists";
             errorModel.setMessage(errMessage);
             log.error(errMessage);
             errorModelList.add(errorModel);
             throw new BusinessException(errorModelList);
         } else {
-            userEntity = userConverter.convertDTOtoEntity(userDTO);
+            userEntity = userConverter.convertDTOtoEntity(userRegistrationDTO);
             userRepository.save(userEntity);
 
             AddressEntity addressEntity = new AddressEntity();
-            addressEntity.setCity(userDTO.getCity());
-            addressEntity.setStreet(userDTO.getStreet());
-            addressEntity.setCountry(userDTO.getCountry());
-            addressEntity.setHouseNo(userDTO.getHouseNo());
-            addressEntity.setPostalCode(userDTO.getPostalCode());
+            addressEntity.setCity(userRegistrationDTO.getCity());
+            addressEntity.setStreet(userRegistrationDTO.getStreet());
+            addressEntity.setCountry(userRegistrationDTO.getCountry());
+            addressEntity.setHouseNo(userRegistrationDTO.getHouseNo());
+            addressEntity.setPostalCode(userRegistrationDTO.getPostalCode());
             addressEntity.setUserEntity(userEntity);
+
+            addressEntity.setType(AddressEntity.ADDRESS_TYPE.PRIMARY.ordinal());
             addressRepository.save(addressEntity);
 
             userDTO = userConverter.convertEntityToDTO(userEntity);
@@ -72,22 +79,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO login(String email, String password) {
+    public UserDTO login(String username, String password) {
         UserDTO userDTO;
         UserEntity userEntity;
-
-        Optional<UserEntity> optionalUserEntity = userRepository.findByEmailAndPassword(email, password);
+        Optional<UserEntity> optionalUserEntity = userRepository.findByUsernameAndPassword(username, password);
         if (optionalUserEntity.isPresent()) {
             userEntity = optionalUserEntity.get();
             userDTO = userConverter.convertEntityToDTO(userEntity);
-            Optional<AddressEntity> optionalAddressEntity = addressRepository.findAllByUserEntityId(userEntity.getId());
+            Optional<AddressEntity> optionalAddressEntity = addressRepository.findPrimaryTypeByUserEntityId(userEntity.getId());
             optionalAddressEntity.ifPresent(addressEntity -> userConverter.setUserDTOaddress(userDTO, addressEntity));
+            userDTO.setRoles(roleService.getRolesNamesForUserId(userEntity.getId()));
             userDTO.setPassword(null);
         } else {
             List<ErrorModel> errorModelList = new ArrayList<>();
             ErrorModel errorModel = new ErrorModel();
             errorModel.setCode("INVALID_LOGIN");
-            String errMessage = "Incorrect email or password";
+            String errMessage = "Incorrect username or password";
             errorModel.setMessage(errMessage);
             log.error(errMessage);
             errorModelList.add(errorModel);
@@ -102,8 +109,9 @@ public class UserServiceImpl implements UserService {
         List<UserEntity> entityList = (List<UserEntity>) userRepository.findAll();
         for (UserEntity userEntity : entityList) {
             UserDTO userDTO = userConverter.convertEntityToDTO(userEntity);
-            Optional<AddressEntity> optionalAddressEntity = addressRepository.findAllByUserEntityId(userEntity.getId());
+            Optional<AddressEntity> optionalAddressEntity = addressRepository.findPrimaryTypeByUserEntityId(userEntity.getId());
             optionalAddressEntity.ifPresent(addressEntity -> userConverter.setUserDTOaddress(userDTO, addressEntity));
+            userDTO.setRoles(roleService.getRolesNamesForUserId(userEntity.getId()));
             userDTO.setPassword(null);
             userDTOlist.add(userDTO);
         }
@@ -120,8 +128,7 @@ public class UserServiceImpl implements UserService {
         if (optionalUserEntity.isPresent()) {
             userEntity = optionalUserEntity.get();
             userId = userEntity.getId();
-
-            Optional<AddressEntity> optionalAddressEntity = addressRepository.findAllByUserEntityId(userId);
+            Optional<AddressEntity> optionalAddressEntity = addressRepository.findPrimaryTypeByUserEntityId(userEntity.getId());
             if (optionalAddressEntity.isPresent()) {
                 addressEntity = optionalAddressEntity.get();
                 addressEntity.setUserEntity(userEntity);
@@ -140,8 +147,9 @@ public class UserServiceImpl implements UserService {
         if (optionalUserEntity.isPresent()) {
             UserEntity userEntity = optionalUserEntity.get();
             userDTO = userConverter.convertEntityToDTO(userEntity);
-            Optional<AddressEntity> optionalAddressEntity = addressRepository.findAllByUserEntityId(id);
+            Optional<AddressEntity> optionalAddressEntity = addressRepository.findPrimaryTypeByUserEntityId(userEntity.getId());
             optionalAddressEntity.ifPresent(addressEntity -> userConverter.setUserDTOaddress(userDTO, addressEntity));
+            userDTO.setRoles(roleService.getRolesNamesForUserId(id));
             userDTO.setPassword(null);
         } else {
             List<ErrorModel> errorModelList = new ArrayList<>();

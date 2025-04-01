@@ -10,4 +10,5 @@ import java.util.List;
 public interface AssetRepository extends CrudRepository<AssetEntity, Long> {
     @Query("SELECT p FROM AssetEntity p WHERE p.userEntity.id = :userId")
     List<AssetEntity> findAllByUserEntityId(@Param("userId") Long userId);
+
 }

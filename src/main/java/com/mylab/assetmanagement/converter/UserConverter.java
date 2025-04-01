@@ -3,6 +3,7 @@ package com.mylab.assetmanagement.converter;
 import com.mylab.assetmanagement.dto.UserDTO;
 import com.mylab.assetmanagement.entity.AddressEntity;
 import com.mylab.assetmanagement.entity.UserEntity;
+import org.apache.catalina.User;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Component;
  *   -  Scans the application for classes annotated with @Component
  *   -  Instantiate them and inject any specified dependencies into them
  *   -  Inject them wherever needed
- *   -  @Component == singleton instance, so it can be autowired
+ *   -  @Component == singleton instance, it can be autowired
  */
 
 @Component
@@ -26,7 +27,7 @@ public class UserConverter {
         entity.setName(userDTO.getName());
         entity.setPassword(userDTO.getPassword());
         entity.setPhone(userDTO.getPhone());
-
+        entity.setUsername(userDTO.getUsername());
         return entity;
     }
 
@@ -37,7 +38,7 @@ public class UserConverter {
         dto.setName(userEntity.getName());
         dto.setPassword(userEntity.getPassword());
         dto.setPhone(userEntity.getPhone());
-
+        dto.setUsername(userEntity.getUsername());
         return dto;
     }
 
@@ -47,7 +48,7 @@ public class UserConverter {
         userDTO.setCity(addressEntity.getCity());
         userDTO.setPostalCode(addressEntity.getPostalCode());
         userDTO.setCountry(addressEntity.getCountry());
-
         return userDTO;
     }
+
 }

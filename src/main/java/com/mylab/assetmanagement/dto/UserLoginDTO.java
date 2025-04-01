@@ -2,6 +2,8 @@ package com.mylab.assetmanagement.dto;
 
 import io.swagger.v3.oas.annotations.Hidden;
 
+import java.util.List;
+
 public class UserLoginDTO extends UserDTO {
 
     @Hidden
@@ -24,5 +26,12 @@ public class UserLoginDTO extends UserDTO {
 
     @Hidden
     private String country;
+
+    @Hidden
+    private String email;
+
+    @Hidden
+    private List<String> roles;
+
 }
 

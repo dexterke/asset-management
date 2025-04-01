@@ -1,7 +1,9 @@
 package com.mylab.assetmanagement.converter;
 
 import com.mylab.assetmanagement.dto.AssetDTO;
+import com.mylab.assetmanagement.entity.AddressEntity;
 import com.mylab.assetmanagement.entity.AssetEntity;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,7 +23,16 @@ public class AssetConverter {
     public AssetEntity convertDTOtoEntity(AssetDTO assetDTO) {
         AssetEntity assetEntity = new AssetEntity();
         assetEntity.setTitle(assetDTO.getTitle());
-        assetEntity.setAddress(assetDTO.getAddress());
+
+        AddressEntity addressEntity = new AddressEntity();
+        addressEntity.setCity(assetDTO.getCity());
+        addressEntity.setHouseNo(assetDTO.getHouseNo());
+        addressEntity.setStreet(assetDTO.getStreet());
+        addressEntity.setPostalCode(assetDTO.getPostalCode());
+        addressEntity.setCity(assetDTO.getCountry());
+        addressEntity.setType(AddressEntity.ADDRESS_TYPE.ASSET.ordinal());
+
+        assetEntity.setAddressEntity(addressEntity);
         assetEntity.setPrice(assetDTO.getPrice());
         assetEntity.setDescription(assetDTO.getDescription());
         return assetEntity;
@@ -31,7 +42,13 @@ public class AssetConverter {
         AssetDTO assetDTO = new AssetDTO();
         assetDTO.setId(assetEntity.getId());
         assetDTO.setTitle(assetEntity.getTitle());
-        assetDTO.setAddress(assetEntity.getAddress());
+
+        assetDTO.setCity(assetEntity.getAddressEntity().getCity());
+        assetDTO.setHouseNo(assetEntity.getAddressEntity().getHouseNo());
+        assetDTO.setStreet(assetEntity.getAddressEntity().getStreet());
+        assetDTO.setPostalCode(assetEntity.getAddressEntity().getPostalCode());
+        assetDTO.setCountry(assetEntity.getAddressEntity().getCountry());
+
         assetDTO.setPrice(assetEntity.getPrice());
         assetDTO.setDescription(assetEntity.getDescription());
         assetDTO.setUserId(assetEntity.getUserEntity().getId());

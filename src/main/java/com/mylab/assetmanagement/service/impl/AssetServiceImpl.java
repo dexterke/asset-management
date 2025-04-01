@@ -2,10 +2,12 @@ package com.mylab.assetmanagement.service.impl;
 
 import com.mylab.assetmanagement.converter.AssetConverter;
 import com.mylab.assetmanagement.dto.AssetDTO;
+import com.mylab.assetmanagement.entity.AddressEntity;
 import com.mylab.assetmanagement.entity.AssetEntity;
 import com.mylab.assetmanagement.entity.UserEntity;
 import com.mylab.assetmanagement.exception.BusinessException;
 import com.mylab.assetmanagement.exception.ErrorModel;
+import com.mylab.assetmanagement.repository.AddressRepository;
 import com.mylab.assetmanagement.repository.AssetRepository;
 import com.mylab.assetmanagement.repository.UserRepository;
 import com.mylab.assetmanagement.service.AssetService;
@@ -27,12 +29,18 @@ classpath scanning is used.
 public class AssetServiceImpl implements AssetService {
 
     private static final Logger log = LoggerFactory.getLogger(AssetServiceImpl.class);
+
     @Autowired
     private AssetRepository assetRepository;
+
     @Autowired
     private AssetConverter assetConverter;
+
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    AddressRepository addressRepository;
 
     @Override
     public AssetDTO getAsset(Long id) {
@@ -95,9 +103,31 @@ public class AssetServiceImpl implements AssetService {
         if (byId.isPresent()) {
             AssetEntity entity = byId.get();
             entity.setTitle(assetDTO.getTitle());
-            entity.setAddress(assetDTO.getAddress());
             entity.setPrice(assetDTO.getPrice());
             entity.setDescription(assetDTO.getDescription());
+
+            Optional<AddressEntity> optionalAddressEntity = addressRepository.findAssetTypeByUserEntityId(entity.getId());
+            if (optionalAddressEntity.isPresent()) {
+                AddressEntity addressEntity = optionalAddressEntity.get();
+                addressEntity.setHouseNo(assetDTO.getHouseNo());
+                addressEntity.setStreet(assetDTO.getStreet());
+                addressEntity.setCity(assetDTO.getCity());
+                addressEntity.setPostalCode(assetDTO.getPostalCode());
+                addressEntity.setCountry(assetDTO.getCountry());
+                addressEntity.setType(AddressEntity.ADDRESS_TYPE.ASSET.ordinal());
+                entity.setAddressEntity(addressEntity);
+                addressRepository.save(addressEntity);
+            } else {
+                List<ErrorModel> errorModelList = new ArrayList<>();
+                ErrorModel errorModel = new ErrorModel();
+                errorModel.setCode("ADDRESS_DOES_NOT_EXIST");
+                String errMessage = "Address does not exist";
+                errorModel.setMessage(errMessage);
+                log.error(errMessage);
+                errorModelList.add(errorModel);
+                throw new BusinessException(errorModelList);
+            }
+
             assetRepository.save(entity);
             assetDto = assetConverter.convertEntityToDTO(entity);
         }
@@ -144,13 +174,32 @@ public class AssetServiceImpl implements AssetService {
     }
 
     @Override
-    public AssetDTO updateAssetAddress(AssetDTO assetDTO, Long id) {
-        Optional<AssetEntity> byId = assetRepository.findById(id);
+    public AssetDTO updateAssetAddress(AssetDTO assetDTO, Long assetId) {
+        Optional<AssetEntity> byId = assetRepository.findById(assetId);
         AssetDTO dto = null;
         if (byId.isPresent()) {
             AssetEntity entity = byId.get();
-            entity.setAddress(assetDTO.getAddress());
-            assetRepository.save(entity);
+            Optional<AddressEntity> optionalAddressEntity = addressRepository.findAssetTypeByUserEntityId(entity.getId());
+            if (optionalAddressEntity.isPresent()) {
+                AddressEntity addressEntity = optionalAddressEntity.get();
+                addressEntity.setHouseNo(assetDTO.getHouseNo());
+                addressEntity.setStreet(assetDTO.getStreet());
+                addressEntity.setCity(assetDTO.getCity());
+                addressEntity.setPostalCode(assetDTO.getPostalCode());
+                addressEntity.setCountry(assetDTO.getCountry());
+                addressEntity.setType(AddressEntity.ADDRESS_TYPE.ASSET.ordinal());
+                entity.setAddressEntity(addressEntity);
+                addressRepository.save(addressEntity);
+            } else {
+                List<ErrorModel> errorModelList = new ArrayList<>();
+                ErrorModel errorModel = new ErrorModel();
+                errorModel.setCode("ADDRESS_DOES_NOT_EXIST");
+                String errMessage = "Address does not exist";
+                errorModel.setMessage(errMessage);
+                log.error(errMessage);
+                errorModelList.add(errorModel);
+                throw new BusinessException(errorModelList);
+            }
             dto = assetConverter.convertEntityToDTO(entity);
         }
         return dto;

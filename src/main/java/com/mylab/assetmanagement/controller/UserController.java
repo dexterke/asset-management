@@ -2,6 +2,9 @@ package com.mylab.assetmanagement.controller;
 
 import com.mylab.assetmanagement.dto.UserDTO;
 import com.mylab.assetmanagement.dto.UserLoginDTO;
+import com.mylab.assetmanagement.dto.UserRegistrationDTO;
+import com.mylab.assetmanagement.dto.UserRoleDTO;
+import com.mylab.assetmanagement.service.RoleService;
 import com.mylab.assetmanagement.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.slf4j.Logger;
@@ -36,6 +39,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private RoleService roleService;
+
     /**
      * Swagger-UI input fields, set to @Validated instead of @RequestBody
      *
@@ -46,7 +52,7 @@ public class UserController {
     @PostMapping(value = "/login", path = "/login", consumes = {"application/json"}, produces = {"application/json"})
     public ResponseEntity<UserDTO> login(@RequestBody @Validated UserLoginDTO userLoginDTO) {
         UserDTO userDTO = userLoginDTO;
-        userDTO = userService.login(userDTO.getEmail(), userDTO.getPassword());
+        userDTO = userService.login(userDTO.getUsername(), userDTO.getPassword());
         log.info(DB_URL_LOG, dbUrl);
         return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
@@ -55,6 +61,7 @@ public class UserController {
     @GetMapping(value = "/getUser/{id}", path = "/getUser/{id}", produces = {"application/json"})
     public ResponseEntity<UserDTO> getUser(@PathVariable Long id) {
         UserDTO userDTO = userService.getUser(id);
+        log.info(DB_URL_LOG, dbUrl);
         return new ResponseEntity<>(userDTO, userDTO == null ? HttpStatus.NOT_FOUND : HttpStatus.OK);
     }
 
@@ -62,27 +69,52 @@ public class UserController {
     @GetMapping(value = "/getAllUsers", path = "/getAllUsers", produces = {"application/json"})
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<UserDTO> userList = userService.getAllUsers();
-        ResponseEntity<List<UserDTO>> responseEntity = new ResponseEntity<>(userList, userList == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK);
         log.info(DB_URL_LOG, dbUrl);
+        ResponseEntity<List<UserDTO>> responseEntity =
+                new ResponseEntity<>(userList, userList.isEmpty() ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK);
         return responseEntity;
     }
 
     @Operation(summary = "register", description = "User registration")
     @PostMapping(value = "/register", path = "/register", consumes = {"application/json"}, produces = {"application/json"})
-    public ResponseEntity<UserDTO> register(@RequestBody @Validated UserDTO userDTO) {
-        userDTO = userService.register(userDTO);
-        ResponseEntity<UserDTO> responseEntity = new ResponseEntity<>(userDTO, userDTO == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.CREATED);
+    public ResponseEntity<UserDTO> register(@RequestBody @Validated UserRegistrationDTO userRegistrationDTO) {
+        UserDTO userDTO = userService.register(userRegistrationDTO);
         log.info(DB_URL_LOG, dbUrl);
+        ResponseEntity<UserDTO> responseEntity = new ResponseEntity<>(userDTO, userDTO == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.CREATED);
         return responseEntity;
     }
 
     @Operation(summary = "deleteUser", description = "Delete a user")
-    @DeleteMapping(value = "/deleteUser/{id}", path = "/deleteUser/{id}")
-    public ResponseEntity<UserDTO> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
-        ResponseEntity<UserDTO> responseEntity = new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    @DeleteMapping(value = "/deleteUser/{userId}", path = "/deleteUser/{userId}")
+    public ResponseEntity<UserDTO> deleteUser(@PathVariable Long userId) {
+        userService.deleteUser(userId);
         log.info(DB_URL_LOG, dbUrl);
+        ResponseEntity<UserDTO> responseEntity = new ResponseEntity<>(HttpStatus.NO_CONTENT);
         return responseEntity;
     }
 
+    @Operation(summary = "getUserRoles", description = "List roles for a user")
+    @GetMapping(value = "/{userId}/roles", path = "/{userId}/roles", produces = {"application/json"})
+    public ResponseEntity<List<UserRoleDTO>> getUserRoles(@PathVariable Long userId) {
+        List<UserRoleDTO> userRoleDTOList = roleService.getRolesForUserId(userId);
+        log.info(DB_URL_LOG, dbUrl);
+        return new ResponseEntity<>(userRoleDTOList, userRoleDTOList.isEmpty() ? HttpStatus.NOT_FOUND : HttpStatus.OK);
+    }
+
+    @Operation(summary = "assignRole", description = "Assign role to a user")
+    @PostMapping(value = "/{userId}/roles/{roleId}", path = "/{userId}/roles/{roleId}", produces = {"application/json"})
+    public ResponseEntity<UserRoleDTO> assignRole(@PathVariable Long userId, @PathVariable Long roleId) {
+        UserRoleDTO newRoleForUserId = roleService.setRoleForUserDto(userId, roleId);
+        log.info(DB_URL_LOG, dbUrl);
+        return new ResponseEntity<>(newRoleForUserId, newRoleForUserId == null ? HttpStatus.NOT_FOUND : HttpStatus.OK);
+    }
+
+    @Operation(summary = "deleteUserRole", description = "Delete role for a user")
+    @DeleteMapping(value = "/{userId}/roles/{roleId}", path = "/{userId}/roles/{roleId}", produces = {"application/json"})
+    public ResponseEntity<UserRoleDTO> deleteUserRole(@PathVariable Long userId, @PathVariable Long roleId) {
+        roleService.deleteUserRole(userId, roleId);
+        log.info(DB_URL_LOG, dbUrl);
+        ResponseEntity<UserRoleDTO> responseEntity = new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return responseEntity;
+    }
 }
