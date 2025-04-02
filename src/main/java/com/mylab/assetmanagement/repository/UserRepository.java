@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends CrudRepository<UserEntity, Long> {
-    Optional<UserEntity> findByEmailAndPassword(String email, String password);
+    Optional<UserEntity> findOneByEmailAndPassword(String email, String password);
 
-    Optional<UserEntity> findByUsernameAndPassword(String email, String password);
+    Optional<UserEntity> findOneByUsernameAndPassword(String email, String password);
 
-    Optional<UserEntity> findByEmail(String email);
+    Optional<UserEntity> findOneByEmail(String email);
 
-    Optional<UserEntity> findByUsername(String username);
+    Optional<UserEntity> findOneByUsername(String username);
 
     @Query("SELECT p FROM UserRoleEntity p WHERE p.userEntity.id = :userId")
     List<UserRoleEntity> getRoles(@Param("userId") Long userId);

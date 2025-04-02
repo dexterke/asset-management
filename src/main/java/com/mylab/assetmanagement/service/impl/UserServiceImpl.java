@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO register(UserRegistrationDTO userRegistrationDTO) {
         UserEntity userEntity;
         UserDTO userDTO;
-        Optional<UserEntity> optionalUserEntity = userRepository.findByUsername(userRegistrationDTO.getUsername());
+        Optional<UserEntity> optionalUserEntity = userRepository.findOneByUsername(userRegistrationDTO.getUsername());
         if (optionalUserEntity.isPresent()) {
             List<ErrorModel> errorModelList = new ArrayList<>();
             ErrorModel errorModel = new ErrorModel();
@@ -82,7 +82,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO login(String username, String password) {
         UserDTO userDTO;
         UserEntity userEntity;
-        Optional<UserEntity> optionalUserEntity = userRepository.findByUsernameAndPassword(username, password);
+        Optional<UserEntity> optionalUserEntity = userRepository.findOneByUsernameAndPassword(username, password);
         if (optionalUserEntity.isPresent()) {
             userEntity = optionalUserEntity.get();
             userDTO = userConverter.convertEntityToDTO(userEntity);

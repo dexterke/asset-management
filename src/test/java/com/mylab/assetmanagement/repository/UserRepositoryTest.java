@@ -34,26 +34,26 @@ class UserRepositoryTest {
     }
 
     @Test
-    void findByEmailAndPassword() {
-        Optional<UserEntity> result = userRepository.findByEmailAndPassword(
+    void findOneByEmailAndPasswordTest() {
+        Optional<UserEntity> result = userRepository.findOneByEmailAndPassword(
                 "email", "password");
         assertThat(result).isEmpty();
 
         // when exists
         userRepository.save(testUserEntity);
-        result = userRepository.findByEmailAndPassword("email", "password");
+        result = userRepository.findOneByEmailAndPassword("email", "password");
         assertThat(result).isPresent();
         assertThat(result.get().getPassword()).isEqualTo("password");
     }
 
     @Test
-    void findByEmail() {
-        Optional<UserEntity> result = userRepository.findByEmail("email");
+    void findByEmailTest() {
+        Optional<UserEntity> result = userRepository.findOneByEmail("email");
         assertThat(result).isEmpty();
 
         // when exists
         userRepository.save(testUserEntity);
-        result = userRepository.findByEmail("email");
+        result = userRepository.findOneByEmail("email");
         assertThat(result).isPresent();
     }
 

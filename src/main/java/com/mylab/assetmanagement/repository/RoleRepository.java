@@ -11,10 +11,10 @@ import java.util.Optional;
 public interface RoleRepository extends CrudRepository<RoleEntity, Long> {
 
     @Query("SELECT p FROM RoleEntity p WHERE p.id = :roleId")
-    Optional<RoleEntity> findRoleById(@Param("roleId") Long userId);
+    Optional<RoleEntity> findOneRoleById(@Param("roleId") Long userId);
 
     @Query("SELECT p FROM RoleEntity p WHERE p.name = :roleName")
-    Optional<RoleEntity> findRoleByName(@Param("roleName") String roleName);
+    Optional<RoleEntity> findOneRoleByName(@Param("roleName") String roleName);
 
     @Query("SELECT p FROM RoleEntity p")
     List<RoleEntity> findAllRoles();

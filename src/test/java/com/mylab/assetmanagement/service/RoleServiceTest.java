@@ -104,7 +104,7 @@ class RoleServiceTest {
     @Test
     void addRoleTest() {
         // When role exists
-        given(roleRepository.findRoleByName(ArgumentMatchers.any())).willReturn(Optional.of(roleEntity));
+        given(roleRepository.findOneRoleByName(ArgumentMatchers.any())).willReturn(Optional.of(roleEntity));
         BusinessException thrown =
                 assertThrowsExactly(BusinessException.class,
                                     () -> {
@@ -114,7 +114,7 @@ class RoleServiceTest {
         assertThat(errMsG).contains("Role already exists");
 
         // When not found
-        given(roleRepository.findRoleByName(ArgumentMatchers.any())).willReturn(Optional.empty());
+        given(roleRepository.findOneRoleByName(ArgumentMatchers.any())).willReturn(Optional.empty());
         RoleDTO testRoleDTO = roleService.addRole(roleDTO);
         assertThat(testRoleDTO).isNotNull().usingRecursiveComparison().isEqualTo(roleDTO);
     }
@@ -122,11 +122,11 @@ class RoleServiceTest {
     @Test
     void getRoleTest() {
         Optional<RoleEntity> byId =
-                roleRepository.findRoleById(ArgumentMatchers.anyLong());
+                roleRepository.findOneRoleById(ArgumentMatchers.anyLong());
         assertThat(byId).isEmpty();
 
         // When not found
-        given(roleRepository.findRoleById(ArgumentMatchers.any())).willReturn(Optional.empty());
+        given(roleRepository.findOneRoleById(ArgumentMatchers.any())).willReturn(Optional.empty());
         BusinessException thrown =
                 assertThrowsExactly(BusinessException.class, () -> {
                     roleService.getRole(ArgumentMatchers.anyLong());
@@ -135,7 +135,7 @@ class RoleServiceTest {
         assertThat(errMsG).contains("Role not found");
 
         // When exists
-        given(roleRepository.findRoleById(ArgumentMatchers.any())).willReturn(Optional.of(roleEntity));
+        given(roleRepository.findOneRoleById(ArgumentMatchers.any())).willReturn(Optional.of(roleEntity));
         RoleDTO testRoleDTO = roleService.getRole(ArgumentMatchers.anyLong());
         assertThat(testRoleDTO).isNotNull().usingRecursiveComparison().ignoringFields("id").isEqualTo(roleDTO);
 
@@ -151,12 +151,12 @@ class RoleServiceTest {
     @Test
     void deleteRoleTest() {
         // when exists
-        given(roleRepository.findRoleById(ArgumentMatchers.anyLong())).willReturn(Optional.of(roleEntity));
+        given(roleRepository.findOneRoleById(ArgumentMatchers.anyLong())).willReturn(Optional.of(roleEntity));
         Long roleId = roleService.deleteRole(roleEntity.getId());
         assertThat(roleId).isNotNull().isEqualTo(roleEntity.getId());
 
         //when not exist
-        given(roleRepository.findRoleById(ArgumentMatchers.anyLong())).willReturn(Optional.empty());
+        given(roleRepository.findOneRoleById(ArgumentMatchers.anyLong())).willReturn(Optional.empty());
         BusinessException thrown =
                 assertThrowsExactly(BusinessException.class, () -> {
                     roleService.deleteRole(1L);

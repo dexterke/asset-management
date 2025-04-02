@@ -41,7 +41,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public RoleDTO addRole(RoleDTO roleDTO) {
-        Optional <RoleEntity> optionalRoleEntity = roleRepository.findRoleByName(roleDTO.getName());
+        Optional <RoleEntity> optionalRoleEntity = roleRepository.findOneRoleByName(roleDTO.getName());
         if(optionalRoleEntity.isPresent()) {
             List<ErrorModel> errorModelList = new ArrayList<>();
             ErrorModel errorModel = new ErrorModel();
@@ -63,7 +63,7 @@ public class RoleServiceImpl implements RoleService {
     public RoleDTO getRole(Long id) {
         RoleEntity entity;
         RoleDTO dto = new RoleDTO();
-        Optional<RoleEntity> optionalRoleEntity = roleRepository.findRoleById(id);
+        Optional<RoleEntity> optionalRoleEntity = roleRepository.findOneRoleById(id);
         if (optionalRoleEntity.isPresent()) {
             entity = optionalRoleEntity.get();
             dto.setId(entity.getId());
@@ -95,7 +95,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Long deleteRole(Long id) {
-        Optional <RoleEntity> optionalRoleEntity = roleRepository.findRoleById(id);
+        Optional <RoleEntity> optionalRoleEntity = roleRepository.findOneRoleById(id);
         if(optionalRoleEntity.isPresent()) {
             roleRepository.deleteById(id);
             return id;
@@ -139,7 +139,7 @@ public class RoleServiceImpl implements RoleService {
         Optional<UserEntity> optionalUserEntity = userRepository.findById(userId);
 
         if (optionalUserEntity.isPresent()) {
-            Optional<RoleEntity> optionalRoleEntity = roleRepository.findRoleById(rolesIDForUser);
+            Optional<RoleEntity> optionalRoleEntity = roleRepository.findOneRoleById(rolesIDForUser);
 
             if (optionalRoleEntity.isPresent()) {
                 RoleEntity roleEntity = optionalRoleEntity.get();

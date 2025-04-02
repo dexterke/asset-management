@@ -122,7 +122,7 @@ class UserServiceTest {
 
     @Test
     void registerFailedTest() {
-        given(userRepository.findByUsername(ArgumentMatchers.any())).willReturn(Optional.of(testUserEntity));
+        given(userRepository.findOneByUsername(ArgumentMatchers.any())).willReturn(Optional.of(testUserEntity));
         BusinessException thrown =
                 assertThrowsExactly(BusinessException.class, () -> {
             UserDTO registerUser = userService.register(testRegisterUserDTO);
@@ -134,7 +134,7 @@ class UserServiceTest {
     @Test
     void registerTest() {
         Optional<UserEntity> optionalUserEntity = Optional.empty();
-        given(userRepository.findByUsername(ArgumentMatchers.any())).willReturn(optionalUserEntity);
+        given(userRepository.findOneByUsername(ArgumentMatchers.any())).willReturn(optionalUserEntity);
         UserDTO registerUser = userService.register(testRegisterUserDTO);
         assertThat(registerUser).isNotNull()
                 .usingRecursiveComparison()
@@ -155,8 +155,8 @@ class UserServiceTest {
 
     @Test
     void loginTest() {
-        given(userRepository.findByUsernameAndPassword(ArgumentMatchers.any(),
-                                                    ArgumentMatchers.any())).willReturn(Optional.of(testUserEntity));
+        given(userRepository.findOneByUsernameAndPassword(ArgumentMatchers.any(),
+                                                          ArgumentMatchers.any())).willReturn(Optional.of(testUserEntity));
         UserDTO loginUser = userService.login("", "");
         assertThat(loginUser).isNotNull().usingRecursiveComparison()
                 .ignoringFields("password", "country", "city", "street", "postalCode", "houseNo", "roles")
