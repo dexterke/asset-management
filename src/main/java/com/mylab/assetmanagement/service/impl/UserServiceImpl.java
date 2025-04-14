@@ -9,6 +9,7 @@ import com.mylab.assetmanagement.exception.BusinessException;
 import com.mylab.assetmanagement.exception.ErrorModel;
 import com.mylab.assetmanagement.repository.AddressRepository;
 import com.mylab.assetmanagement.repository.UserRepository;
+import com.mylab.assetmanagement.service.PasswordEncriptionService;
 import com.mylab.assetmanagement.service.RoleService;
 import com.mylab.assetmanagement.service.UserService;
 import org.slf4j.Logger;
@@ -42,6 +43,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private RoleService roleService;
 
+    @Autowired
+    private PasswordEncriptionService passwordEncriptionService;
+
     @Override
     public UserDTO register(UserRegistrationDTO userRegistrationDTO) {
         UserEntity userEntity;
@@ -58,6 +62,8 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(errorModelList);
         } else {
             userEntity = userConverter.convertDTOtoEntity(userRegistrationDTO);
+            String passwd = passwordEncriptionService.encode(userRegistrationDTO.getPassword());
+            userEntity.setPassword(passwd);
             userRepository.save(userEntity);
 
             AddressEntity addressEntity = new AddressEntity();

@@ -53,6 +53,9 @@ class UserServiceTest {
     private UserService userService = new UserServiceImpl();
 
     @InjectMocks
+    private PasswordEncriptionService passwordEncriptionService;
+
+    @InjectMocks
     private RoleConverter roleConverter;
 
     @InjectMocks
@@ -117,6 +120,8 @@ class UserServiceTest {
         setPrivateField(roleService, "roleRepository", roleRepository);
         setPrivateField(roleService, "userRepository", userRepository);
         setPrivateField(roleService, "roleConverter", roleConverter);
+
+        setPrivateField(userService, "passwordEncriptionService", passwordEncriptionService);
 
     }
 

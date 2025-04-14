@@ -4,10 +4,11 @@ package com.mylab.assetmanagement.security;
 import com.mylab.assetmanagement.entity.UserEntity;
 import com.mylab.assetmanagement.entity.UserRoleEntity;
 import com.mylab.assetmanagement.repository.UserRepository;
+import com.mylab.assetmanagement.service.PasswordEncriptionService;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 
 
 import java.util.ArrayList;
@@ -21,11 +22,10 @@ public class AuthUserDetails implements UserDetails {
     private String password;
     private String username;
 
-    public AuthUserDetails(UserRepository userRepository, UserEntity user) {
+    public AuthUserDetails(UserRepository userRepository, PasswordEncriptionService coder, UserEntity user) {
         this.username = user.getUsername();
-//        this.password = user.getPassword();
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        this.password = encoder.encode(user.getPassword());
+        //this.password = user.getPassword();
+        this.password = coder.encode(user.getPassword());
         List<UserRoleEntity> userRoles = userRepository.getRoles(user.getId());
         this.authorities = translate(userRoles);
     }
