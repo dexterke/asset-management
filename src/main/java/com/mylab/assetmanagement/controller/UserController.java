@@ -41,7 +41,6 @@ public class UserController {
 
     /**
      * Swagger-UI input fields, set to @Validated instead of @RequestBody
-     *
      * @Parameter(name = "email", description = "User email", required = true, example = "user@email.com")
      * @Parameter(name = "password", description = "User password", required = true, example = "password")
      */

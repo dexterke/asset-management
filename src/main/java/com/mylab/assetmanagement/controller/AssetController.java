@@ -38,8 +38,9 @@ public class AssetController {
     @GetMapping(value = "/getAsset/{assetId}", path = "/getAsset/{assetId}", produces = {"application/json"})
     public ResponseEntity<AssetDTO> getAsset(@PathVariable Long assetId) {
         AssetDTO assetDTO = assetService.getAsset(assetId);
-        ResponseEntity<AssetDTO> responseEntity = new ResponseEntity<>(assetDTO, assetDTO == null ? HttpStatus.NOT_FOUND : HttpStatus.FOUND);
-        log.info(DB_URL_LOG, dbUrl);
+        log.debug(DB_URL_LOG, dbUrl);
+        ResponseEntity<AssetDTO> responseEntity = new ResponseEntity<>(
+                assetDTO, assetDTO == null ? HttpStatus.NOT_FOUND : HttpStatus.FOUND);
         return responseEntity;
     }
 
@@ -47,8 +48,9 @@ public class AssetController {
     @GetMapping(value = "/getAllAssets", path = "/getAllAssets", produces = {"application/json"})
     public ResponseEntity<List<AssetDTO>> getAllAssets() {
         List<AssetDTO> assetList = assetService.getAllAssets();
-        ResponseEntity<List<AssetDTO>> responseEntity = new ResponseEntity<>(assetList, assetList == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK);
-        log.info(DB_URL_LOG, dbUrl);
+        log.debug(DB_URL_LOG, dbUrl);
+        ResponseEntity<List<AssetDTO>> responseEntity = new ResponseEntity<>(
+                assetList, assetList == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK);
         return responseEntity;
     }
 
@@ -56,89 +58,104 @@ public class AssetController {
     @GetMapping(value = "/users/{userId}", path = "/users/{userId}", produces = {"application/json"})
     public ResponseEntity<List<AssetDTO>> getAssetsForUser(@PathVariable Long userId) {
         List<AssetDTO> assetList = assetService.getAllAssetsOfUser(userId);
-        ResponseEntity<List<AssetDTO>> responseEntity = new ResponseEntity<>(assetList, assetList.isEmpty() ? HttpStatus.NOT_FOUND : HttpStatus.OK);
-        log.info(DB_URL_LOG, dbUrl);
+        log.debug(DB_URL_LOG, dbUrl);
+        ResponseEntity<List<AssetDTO>> responseEntity = new ResponseEntity<>(
+                assetList, assetList.isEmpty() ? HttpStatus.NOT_FOUND : HttpStatus.OK);
         return responseEntity;
     }
 
     /*
      * Swagger-UI input fields, set to @Validated instead of @RequestBody
+     * @Parameter(name = "title", description = "Title", required = true, example = "Title")
+     * @Parameter(name = "description", description = "Description", required = true, example = "Description")
+     * @Parameter(name = "address", description = "Address", required = true, example = "Address")
+     * @Parameter(name = "price", description = "Price", required = true, example = "0")
+     * @Parameter(name = "userId", description = "Owner's userId", required = true)
      */
     @Operation(summary = "addAsset", description = "Add new asset")
-//    @Parameter(name = "title", description = "Title", required = true, example = "Title")
-//    @Parameter(name = "description", description = "Description", required = true, example = "Description")
-//    @Parameter(name = "address", description = "Address", required = true, example = "Address")
-//    @Parameter(name = "price", description = "Price", required = true, example = "0")
-//    @Parameter(name = "userId", description = "Owner's userId", required = true)
     @PostMapping(value = "/addAsset", path = "/addAsset", consumes = {"application/json"}, produces = {"application/json"})
     public ResponseEntity<AssetDTO> addAsset(@RequestBody @Validated AssetDTO assetDTO) {
         assetDTO = assetService.addAsset(assetDTO);
-        ResponseEntity<AssetDTO> responseEntity = new ResponseEntity<>(assetDTO, assetDTO == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.CREATED);
-        log.info(DB_URL_LOG, dbUrl);
+        log.debug(DB_URL_LOG, dbUrl);
+        ResponseEntity<AssetDTO> responseEntity = new ResponseEntity<>(
+                assetDTO, assetDTO == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.CREATED);
         return responseEntity;
     }
 
     @Operation(summary = "updateAsset", description = "Update asset")
-    @PutMapping(value = "/updateAsset/{assetId}", path = "/updateAsset/{assetId}", consumes = {"application/json"}, produces = {"application/json"})
+    @PutMapping(value = "/updateAsset/{assetId}", path = "/updateAsset/{assetId}",
+                                        consumes = {"application/json"}, produces = {"application/json"})
     public ResponseEntity<AssetDTO> updateAsset(@RequestBody AssetDTO assetDTO, @PathVariable Long assetId) {
         assetDTO = assetService.updateAsset(assetDTO, assetId);
-        ResponseEntity<AssetDTO> responseEntity = new ResponseEntity<>(assetDTO, assetDTO == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK);
-        log.info(DB_URL_LOG, dbUrl);
+        log.debug(DB_URL_LOG, dbUrl);
+        ResponseEntity<AssetDTO> responseEntity = new ResponseEntity<>(
+                assetDTO, assetDTO == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK);
         return responseEntity;
     }
 
     @Operation(summary = "update-userid/{assetId}", description = "Update asset owner userId")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = "application/json", examples = @ExampleObject("{ \"userId\": \"0\" }")))
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            content = @Content(mediaType = "application/json", examples = @ExampleObject("{ \"userId\": \"0\" }")))
     @ApiResponse(content = @Content(mediaType = "application/json", examples = @ExampleObject("{ \"userId\": \"0\" }")))
-    @PatchMapping(value = "/updateAsset/update-userid/{assetId}", path = "/updateAsset/update-userid/{assetId}", consumes = {"application/json"}, produces = {"application/json"})
+    @PatchMapping(value = "/updateAsset/update-userid/{assetId}", path = "/updateAsset/update-userid/{assetId}",
+                                        consumes = {"application/json"}, produces = {"application/json"})
     public ResponseEntity<AssetDTO> updateAssetUserId(@RequestBody AssetDTO assetDTO, @PathVariable Long assetId) {
         assetDTO = assetService.updateAssetUserId(assetDTO, assetId);
-        ResponseEntity<AssetDTO> responseEntity = new ResponseEntity<>(assetDTO, assetDTO == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK);
-        log.info(DB_URL_LOG, dbUrl);
+        log.debug(DB_URL_LOG, dbUrl);
+        ResponseEntity<AssetDTO> responseEntity = new ResponseEntity<>(
+                assetDTO, assetDTO == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK);
         return responseEntity;
     }
 
     @Operation(summary = "update-title/{assetId}", description = "Update asset title")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = "application/json", examples = @ExampleObject("{ \"title\": \"string\" }")))
     @ApiResponse(content = @Content(mediaType = "application/json", examples = @ExampleObject("{ \"title\": \"string\" }")))
-    @PatchMapping(value = "/updateAsset/update-title/{assetId}", path = "/updateAsset/update-title/{assetId}", consumes = {"application/json"}, produces = {"application/json"})
+    @PatchMapping(value = "/updateAsset/update-title/{assetId}", path = "/updateAsset/update-title/{assetId}",
+                                            consumes = {"application/json"}, produces = {"application/json"})
     public ResponseEntity<AssetDTO> updateAssetTitle(@RequestBody AssetDTO assetDTO, @PathVariable Long assetId) {
         assetDTO = assetService.updateAssetTitle(assetDTO, assetId);
-        ResponseEntity<AssetDTO> responseEntity = new ResponseEntity<>(assetDTO, assetDTO == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK);
-        log.info(DB_URL_LOG, dbUrl);
+        log.debug(DB_URL_LOG, dbUrl);
+        ResponseEntity<AssetDTO> responseEntity = new ResponseEntity<>(
+                assetDTO, assetDTO == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK);
         return responseEntity;
     }
 
     @Operation(summary = "update-price/{assetId}", description = "Update asset price")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = "application/json", examples = @ExampleObject("{ \"price\": \"0\" }")))
     @ApiResponse(content = @Content(mediaType = "application/json", examples = @ExampleObject("{ \"price\": \"0\" }")))
-    @PatchMapping(value = "/updateAsset/update-price/{assetId}", path = "/updateAsset/update-price/{assetId}", consumes = {"application/json"}, produces = {"application/json"})
+    @PatchMapping(value = "/updateAsset/update-price/{assetId}", path = "/updateAsset/update-price/{assetId}",
+                                            consumes = {"application/json"}, produces = {"application/json"})
     public ResponseEntity<AssetDTO> updateAssetPrice(@RequestBody AssetDTO assetDTO, @PathVariable Long assetId) {
         assetDTO = assetService.updateAssetPrice(assetDTO, assetId);
-        ResponseEntity<AssetDTO> responseEntity = new ResponseEntity<>(assetDTO, assetDTO == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK);
-        log.info(DB_URL_LOG, dbUrl);
+        log.debug(DB_URL_LOG, dbUrl);
+        ResponseEntity<AssetDTO> responseEntity = new ResponseEntity<>(
+                assetDTO, assetDTO == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK);
         return responseEntity;
     }
 
     @Operation(summary = "update-description/{assetId}", description = "Update asset description")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = "application/json", examples = @ExampleObject("{ \"description\": \"string\" }")))
     @ApiResponse(content = @Content(mediaType = "application/json", examples = @ExampleObject("{ \"description\": \"string\" }")))
-    @PatchMapping(value = "/updateAsset/update-description/{assetId}", path = "/updateAsset/update-description/{assetId}", consumes = {"application/json"}, produces = {"application/json"})
+    @PatchMapping(value = "/updateAsset/update-description/{assetId}", path = "/updateAsset/update-description/{assetId}",
+                                            consumes = {"application/json"}, produces = {"application/json"})
     public ResponseEntity<AssetDTO> updateAssetDescription(@RequestBody AssetDTO assetDTO, @PathVariable Long assetId) {
         assetDTO = assetService.updateAssetDescription(assetDTO, assetId);
-        ResponseEntity<AssetDTO> responseEntity = new ResponseEntity<>(assetDTO, assetDTO == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK);
-        log.info(DB_URL_LOG, dbUrl);
+        log.debug(DB_URL_LOG, dbUrl);
+        ResponseEntity<AssetDTO> responseEntity = new ResponseEntity<>(
+                assetDTO, assetDTO == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK);
         return responseEntity;
     }
 
     @Operation(summary = "update-address/{assetId}", description = "Update asset address")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = "application/json", examples = @ExampleObject("{ \"address\": \"string\" }")))
     @ApiResponse(content = @Content(mediaType = "application/json", examples = @ExampleObject("{ \"address\": \"string\" }")))
-    @PatchMapping(value = "/updateAsset/update-address/{assetId}", path = "/updateAsset/update-address/{assetId}", consumes = {"application/json"}, produces = {"application/json"})
+    @PatchMapping(value = "/updateAsset/update-address/{assetId}", path = "/updateAsset/update-address/{assetId}",
+                                            consumes = {"application/json"}, produces = {"application/json"})
     public ResponseEntity<AssetDTO> updateAssetAddress(@RequestBody AssetDTO assetDTO, @PathVariable Long assetId) {
         assetDTO = assetService.updateAssetAddress(assetDTO, assetId);
-        ResponseEntity<AssetDTO> responseEntity = new ResponseEntity<>(assetDTO, assetDTO == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK);
-        log.info(DB_URL_LOG, dbUrl);
+        log.debug(DB_URL_LOG, dbUrl);
+        ResponseEntity<AssetDTO> responseEntity = new ResponseEntity<>(
+                assetDTO, assetDTO == null ? HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK);
         return responseEntity;
     }
 
@@ -146,8 +163,8 @@ public class AssetController {
     @DeleteMapping(value = "/deleteAsset/{assetId}")
     public ResponseEntity<AssetDTO> deleteAsset(@PathVariable Long assetId) {
         assetService.deleteAsset(assetId);
+        log.debug(DB_URL_LOG, dbUrl);
         ResponseEntity<AssetDTO> responseEntity = new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        log.info(DB_URL_LOG, dbUrl);
         return responseEntity;
     }
 

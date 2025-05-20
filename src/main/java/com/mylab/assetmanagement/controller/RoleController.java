@@ -37,6 +37,7 @@ public class RoleController {
     @GetMapping(value = "/getRole/{id}", path = "/getRole/{id}", produces = {"application/json"})
     public ResponseEntity<RoleDTO> getRole(@PathVariable Long id) {
         RoleDTO roleDTO = roleService.getRole(id);
+        log.debug(DB_URL_LOG, dbUrl);
         return new ResponseEntity<>(roleDTO, roleDTO == null ?
                                              HttpStatus.NOT_FOUND :
                                              HttpStatus.OK);
@@ -46,10 +47,10 @@ public class RoleController {
     @GetMapping(value = "/getAllRoles", path = "/getAllRoles", produces = {"application/json"})
     public ResponseEntity<List<RoleDTO>> getAllRoles() {
         List<RoleDTO> roleList = roleService.getAllRoles();
+        log.debug(DB_URL_LOG, dbUrl);
         ResponseEntity<List<RoleDTO>> responseEntity =
                 new ResponseEntity<>(roleList, roleList == null ?
                                                HttpStatus.INTERNAL_SERVER_ERROR : HttpStatus.OK);
-        log.info(DB_URL_LOG, dbUrl);
         return responseEntity;
     }
 
@@ -57,10 +58,10 @@ public class RoleController {
     @PostMapping(value = "/addRole", path = "/addRole", consumes = {"application/json"}, produces = {"application/json"})
     public ResponseEntity<RoleDTO> register(@RequestBody @Validated RoleDTO roleDTO) {
         roleDTO = roleService.addRole(roleDTO);
+        log.debug(DB_URL_LOG, dbUrl);
         ResponseEntity<RoleDTO> responseEntity = new ResponseEntity<>(roleDTO
                 , roleDTO == null ? HttpStatus.INTERNAL_SERVER_ERROR :
                   HttpStatus.CREATED);
-        log.info(DB_URL_LOG, dbUrl);
         return responseEntity;
     }
 
@@ -68,8 +69,8 @@ public class RoleController {
     @DeleteMapping(value = "/deleteRole/{id}", path = "/deleteRole/{id}")
     public ResponseEntity<RoleDTO> deleteRole(@PathVariable Long id) {
         roleService.deleteRole(id);
+        log.debug(DB_URL_LOG, dbUrl);
         ResponseEntity<RoleDTO> responseEntity = new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        log.info(DB_URL_LOG, dbUrl);
         return responseEntity;
     }
 
