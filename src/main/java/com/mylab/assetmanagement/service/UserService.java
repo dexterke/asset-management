@@ -1,6 +1,7 @@
 package com.mylab.assetmanagement.service;
 
 import com.mylab.assetmanagement.dto.UserDTO;
+import com.mylab.assetmanagement.dto.UserPasswordDTO;
 import com.mylab.assetmanagement.dto.UserRegistrationDTO;
 
 import java.util.List;
@@ -21,4 +22,6 @@ public interface UserService {
     Long deleteUser(Long id);
 
     UserDTO getUser(Long id);
+
+    UserDTO updatePassword(UserPasswordDTO userDTO, Long id);
 }

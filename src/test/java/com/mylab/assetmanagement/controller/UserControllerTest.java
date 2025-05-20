@@ -67,7 +67,7 @@ class UserControllerTest {
         testUserDto = new UserDTO();
         testUserDto.setId(1L);
         testUserDto.setName("name");
-        testUserDto.setPassword("1234567890");
+        testUserDto.setPassword("Valid123!");
         testUserDto.setEmail("email@mail");
         testUserDto.setUsername("username");
         testUserDto.setCity("city");
@@ -79,7 +79,7 @@ class UserControllerTest {
 
         testRegisterUserDTO = new UserRegistrationDTO();
         testRegisterUserDTO.setName("name");
-        testRegisterUserDTO.setPassword("1234567890");
+        testRegisterUserDTO.setPassword("Valid123!");
         testRegisterUserDTO.setEmail("email@mail");
         testRegisterUserDTO.setUsername("username");
         testRegisterUserDTO.setUsername("testusername");

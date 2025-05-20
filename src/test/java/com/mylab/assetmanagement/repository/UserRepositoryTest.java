@@ -34,19 +34,6 @@ class UserRepositoryTest {
     }
 
     @Test
-    void findOneByEmailAndPasswordTest() {
-        Optional<UserEntity> result = userRepository.findOneByEmailAndPassword(
-                "email", "password");
-        assertThat(result).isEmpty();
-
-        // when exists
-        userRepository.save(testUserEntity);
-        result = userRepository.findOneByEmailAndPassword("email", "password");
-        assertThat(result).isPresent();
-        assertThat(result.get().getPassword()).isEqualTo("password");
-    }
-
-    @Test
     void findByEmailTest() {
         Optional<UserEntity> result = userRepository.findOneByEmail("email");
         assertThat(result).isEmpty();

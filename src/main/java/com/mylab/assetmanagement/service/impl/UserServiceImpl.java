@@ -2,6 +2,7 @@ package com.mylab.assetmanagement.service.impl;
 
 import com.mylab.assetmanagement.converter.UserConverter;
 import com.mylab.assetmanagement.dto.UserDTO;
+import com.mylab.assetmanagement.dto.UserPasswordDTO;
 import com.mylab.assetmanagement.dto.UserRegistrationDTO;
 import com.mylab.assetmanagement.entity.AddressEntity;
 import com.mylab.assetmanagement.entity.UserEntity;
@@ -88,14 +89,16 @@ public class UserServiceImpl implements UserService {
     public UserDTO login(String username, String password) {
         UserDTO userDTO;
         UserEntity userEntity;
-        Optional<UserEntity> optionalUserEntity = userRepository.findOneByUsernameAndPassword(username, password);
+        boolean matches = false;
+        Optional<UserEntity> optionalUserEntity = userRepository.findOneByUsername(username);
         if (optionalUserEntity.isPresent()) {
             userEntity = optionalUserEntity.get();
-            userDTO = userConverter.convertEntityToDTO(userEntity);
-            Optional<AddressEntity> optionalAddressEntity = addressRepository.findPrimaryTypeByUserEntityId(userEntity.getId());
-            optionalAddressEntity.ifPresent(addressEntity -> userConverter.setUserDTOaddress(userDTO, addressEntity));
-            userDTO.setRoles(roleService.getRolesNamesForUserId(userEntity.getId()));
-            userDTO.setPassword(null);
+            matches = passwordEncriptionService.matches(password, userEntity.getPassword());
+        }
+
+        if (matches) {
+            userEntity = optionalUserEntity.get();
+            userDTO = userDTOfromEntity(userEntity);
         } else {
             List<ErrorModel> errorModelList = new ArrayList<>();
             ErrorModel errorModel = new ErrorModel();
@@ -114,11 +117,7 @@ public class UserServiceImpl implements UserService {
         List<UserDTO> userDTOlist = new ArrayList<>();
         List<UserEntity> entityList = (List<UserEntity>) userRepository.findAll();
         for (UserEntity userEntity : entityList) {
-            UserDTO userDTO = userConverter.convertEntityToDTO(userEntity);
-            Optional<AddressEntity> optionalAddressEntity = addressRepository.findPrimaryTypeByUserEntityId(userEntity.getId());
-            optionalAddressEntity.ifPresent(addressEntity -> userConverter.setUserDTOaddress(userDTO, addressEntity));
-            userDTO.setRoles(roleService.getRolesNamesForUserId(userEntity.getId()));
-            userDTO.setPassword(null);
+            UserDTO userDTO = userDTOfromEntity(userEntity);
             userDTOlist.add(userDTO);
         }
         return userDTOlist;
@@ -148,15 +147,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO getUser(Long id) {
         UserDTO userDTO;
-
         Optional<UserEntity> optionalUserEntity = userRepository.findById(id);
         if (optionalUserEntity.isPresent()) {
             UserEntity userEntity = optionalUserEntity.get();
-            userDTO = userConverter.convertEntityToDTO(userEntity);
-            Optional<AddressEntity> optionalAddressEntity = addressRepository.findPrimaryTypeByUserEntityId(userEntity.getId());
-            optionalAddressEntity.ifPresent(addressEntity -> userConverter.setUserDTOaddress(userDTO, addressEntity));
-            userDTO.setRoles(roleService.getRolesNamesForUserId(id));
-            userDTO.setPassword(null);
+            userDTO = userDTOfromEntity(userEntity);
         } else {
             List<ErrorModel> errorModelList = new ArrayList<>();
             ErrorModel errorModel = new ErrorModel();
@@ -170,4 +164,36 @@ public class UserServiceImpl implements UserService {
         return userDTO;
     }
 
+    @Override
+    public UserDTO updatePassword(UserPasswordDTO passwordDTO, Long id) {
+        UserDTO userDTO;
+        Optional<UserEntity> optionalUserEntity = userRepository.findById(id);
+        if (optionalUserEntity.isPresent()) {
+            UserEntity userEntity = optionalUserEntity.get();
+            String pwd = passwordEncriptionService.encode(passwordDTO.getPassword());
+            userEntity.setPassword(pwd);
+            userRepository.save(userEntity);
+            userDTO = userDTOfromEntity(userEntity);
+        } else {
+            List<ErrorModel> errorModelList = new ArrayList<>();
+            ErrorModel errorModel = new ErrorModel();
+            errorModel.setCode("NOT_FOUND");
+            String errMessage = "User not found";
+            errorModel.setMessage(errMessage);
+            log.error(errMessage);
+            errorModelList.add(errorModel);
+            throw new BusinessException(errorModelList);
+        }
+        return userDTO;
+    }
+
+    private UserDTO userDTOfromEntity(UserEntity userEntity) {
+        UserDTO userDTO;
+        userDTO = userConverter.convertEntityToDTO(userEntity);
+        Optional<AddressEntity> optionalAddressEntity = addressRepository.findPrimaryTypeByUserEntityId(userEntity.getId());
+        optionalAddressEntity.ifPresent(addressEntity -> userConverter.setUserDTOaddress(userDTO, addressEntity));
+        userDTO.setRoles(roleService.getRolesNamesForUserId(userEntity.getId()));
+        userDTO.setPassword(null);
+        return userDTO;
+    }
 }

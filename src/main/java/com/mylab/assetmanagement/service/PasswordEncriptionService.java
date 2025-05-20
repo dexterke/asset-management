@@ -12,4 +12,8 @@ public class PasswordEncriptionService extends BCryptPasswordEncoder{
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
+    public boolean matches(String rawPassword, String encodedPassword) {
+        return passwordEncoder.matches(rawPassword, encodedPassword);
+    }
+
 }

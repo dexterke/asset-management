@@ -9,19 +9,15 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-
 import java.util.List;
 
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UserRegistrationDTO extends UserDTO {
+public class UserPasswordDTO extends UserLoginDTO {
 
-    @NotNull(message = "Email is mandatory")
-    private String email;
-
-    @NotNull(message = "Username is mandatory")
+    @Hidden
     private String username;
 
     @NotNull(message = "Password is mandatory")
@@ -32,12 +28,4 @@ public class UserRegistrationDTO extends UserDTO {
     )
     private String password;
 
-    @NotNull(message = "Name is mandatory")
-    private String name;
-
-    @NotNull(message = "Phone number is mandatory")
-    private String phone;
-
-    @Hidden
-    private List<String> roles;
 }

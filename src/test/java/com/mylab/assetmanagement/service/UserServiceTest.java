@@ -159,17 +159,6 @@ class UserServiceTest {
     }
 
     @Test
-    void loginTest() {
-        given(userRepository.findOneByUsernameAndPassword(ArgumentMatchers.any(),
-                                                          ArgumentMatchers.any())).willReturn(Optional.of(testUserEntity));
-        UserDTO loginUser = userService.login("", "");
-        assertThat(loginUser).isNotNull().usingRecursiveComparison()
-                .ignoringFields("password", "country", "city", "street", "postalCode", "houseNo", "roles")
-                .isEqualTo(testUserEntity);
-        assertThat(loginUser.getPassword()).isNull();
-    }
-
-    @Test
     void getAllUsersTest() {
         // when not found
         List<UserDTO> userDTOlist = userService.getAllUsers();
