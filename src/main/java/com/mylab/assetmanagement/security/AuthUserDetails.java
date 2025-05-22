@@ -24,8 +24,8 @@ public class AuthUserDetails implements UserDetails {
 
     public AuthUserDetails(UserRepository userRepository, PasswordEncriptionService coder, UserEntity user) {
         this.username = user.getUsername();
-        //this.password = user.getPassword();
-        this.password = coder.encode(user.getPassword());
+        this.password = user.getPassword();
+//        this.password = coder.encode(user.getPassword());
         List<UserRoleEntity> userRoles = userRepository.getRoles(user.getId());
         this.authorities = translate(userRoles);
     }

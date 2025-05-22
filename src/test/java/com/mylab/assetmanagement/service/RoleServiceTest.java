@@ -215,7 +215,9 @@ class RoleServiceTest {
     void deleteUserRoleTest() {
         // Not found
         given(userRepository.findById(ArgumentMatchers.any())).willReturn(Optional.empty());
-        given(userRoleRepository.findById(ArgumentMatchers.any())).willReturn(Optional.empty());
+        given(userRoleRepository.findByUserEntityIdAndRoleEntityId(
+                                        ArgumentMatchers.any(), ArgumentMatchers.any()))
+                .willReturn(Optional.empty());
 
         BusinessException thrown = assertThrowsExactly(
                 BusinessException.class, () -> {
@@ -227,13 +229,17 @@ class RoleServiceTest {
         userRoleEntity.setUserEntity(testUserEntity);
         userRoleEntity.setRoleEntity(roleEntity);
         userRoleEntity.setId(999L);
+
+        // when found
         given(userRepository.findById(ArgumentMatchers.any())).willReturn(Optional.of(testUserEntity));
-        given(userRoleRepository.findById(ArgumentMatchers.any())).willReturn(Optional.of(userRoleEntity));
+        given(userRoleRepository.findByUserEntityIdAndRoleEntityId(
+                ArgumentMatchers.any(), ArgumentMatchers.any())).willReturn(Optional.of(userRoleEntity));
+
         Optional<UserEntity> userEnt = userRepository.findById(100L);
-        Optional<UserRoleEntity> userRoleEnt = userRoleRepository.findById(999L);
+        Optional<UserRoleEntity> userRoleEnt = userRoleRepository.findByUserEntityIdAndRoleEntityId(100L, 999L);
+
         roleService.deleteUserRole(100L, 999L);
         assertThat(userEnt).isPresent();
         assertThat(userRoleEnt).isPresent();
-
     }
 }

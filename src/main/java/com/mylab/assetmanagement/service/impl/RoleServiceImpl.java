@@ -15,6 +15,7 @@ import com.mylab.assetmanagement.service.RoleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -170,11 +171,14 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public void deleteUserRole(Long userId, Long roleId) {
         Optional<UserEntity> optionalUserEntity = userRepository.findById(userId);
-        Optional<UserRoleEntity> optionalUserRoleEntity = userRoleRepository.findById(roleId);
+        Optional<UserRoleEntity> optionalUserRoleEntity = userRoleRepository
+                                        .findByUserEntityIdAndRoleEntityId(userId, roleId);
         if (optionalUserRoleEntity.isPresent() && optionalUserEntity.isPresent()) {
             if (optionalUserRoleEntity.get().getUserEntity().getId()
-                                            == optionalUserEntity.get().getId())
-                userRoleRepository.deleteById(roleId);
+                                        == optionalUserEntity.get().getId()) {
+                Long userRoleId = optionalUserRoleEntity.get().getId();
+                userRoleRepository.deleteById(userRoleId);
+            }
         } else {
             List<ErrorModel> errorModelList = new ArrayList<>();
             ErrorModel errorModel = new ErrorModel();
